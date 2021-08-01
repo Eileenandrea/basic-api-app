@@ -4,11 +4,12 @@ class Api::V1::ReviewsController < ApplicationController
     before_action :authenticate_with_token!, only: [:create, :update, :destroy]
     def index
         @reviews = @book.reviews
-        json_response "Index reviews view successfully", true, {reviews: @reviews}, :ok
+        review_serializer = parse_json @reviews
+        json_response "Index reviews view successfully", true, {reviews: review_serializer}, :ok
     end
     def show
-        
-        json_response "show reviews view successfully", true, {reviews: @reviews}, :ok
+        review_serializer = parse_json @review 
+        json_response "show reviews view successfully", true, {reviews: review_serializer}, :ok
     end
 
     def create
@@ -16,6 +17,7 @@ class Api::V1::ReviewsController < ApplicationController
         review.user_id = current_user.id
         review.book_id = params[:book_id]
         if review.save
+            review_serializer = parse_json review
             json_response "Create review successfully", true, {review: review},:ok
         else
             json_response "Created review fail", false, {}, :unprocessable_entity
@@ -25,7 +27,8 @@ class Api::V1::ReviewsController < ApplicationController
     def update
         if correct_user @review.user
             if @review.update review_params
-                json_response "Updated review successfullly", true, {review: @review}, :ok
+                review_serializer = parse_json @review
+                json_response "Updated review successfullly", true, {review: review_serializer}, :ok
             else
                 json_response "Update review fail", false, {}, :unprocessable_entity
             end
